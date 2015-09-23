@@ -53,8 +53,7 @@ def main():
     big = pd.concat(list_of_frames, ignore_index = True)
     big = big.dropna(subset = ['entries', 'exits'])
     big = makeCols(big)
-    #print big
-    print filtered(big)
+    print filter_times(big)
 
 if __name__ == '__main__':
     main()
