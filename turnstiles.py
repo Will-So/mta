@@ -31,18 +31,6 @@ def makeCols(df):
     return df
 
 def clean_frame(df):
-def clean_frame(df, all_csv=False):
-    """Sets the dataframe to the correct type and removes certain erroneous entries
-
-    params
-    ----
-    df: dataframe populated with the mta subway data. 
-    """
-
-    # Removes extra headers that may have been generated while generating yearly csv
-    if all_csv:
-        df = remove_extra_headers(df)
-    
     df2 = pd.DataFrame()
 #    df2['stile'] = zip(df.ca, df.unit, df.scp, df.station)
     df2['station'] = zip(df.station, df.linename)
@@ -57,28 +45,35 @@ def clean_frame(df, all_csv=False):
     df2 = df2[df2.exits >= 0]
     return df2
 
-def remove_extra_headers(df):
-    traffic = traffic.loc[traffic.entries != 'ENTRIES']
-    traffic.entries = traffic.entries.astype(int)
-    traffic.exits = traffic.exits.astype(int)
+def filter_times(df, start = 12, end = 23):
+    """
+    Returns all entries between start and end time, inclusive.
+    """
+    filtered = df[df['datetime'].apply(lambda x: x.hour >= start and x.hour <= end)]
+    return filtered
 
-def n_biggest_total(df, period, n):
-    s= df.groupby(['station', period])['exits'].agg(np.sum)
+def n_busiest_stations(df, n):
+    s= df.groupby('station')['exits'].agg(np.sum)
+    return s.nlargest(n)
+
+def n_biggest_days_by_station(df, n):
+    s= df.groupby(['station', 'date'])['exits'].agg(np.sum)
     print s.nlargest(n)
 
 def main():
     pd.set_option('display.max_rows', 100)
     pd.set_option('display.width', 200)
         
-    start = date(2015, 1, 1)
-    end = date(2015, 2, 1)
+    start = date(2015, 3, 1)
+    end = date(2015, 6, 1)
     files = get_file_names(start, end)
     frames = [read_file(file) for file in files]
     big = pd.concat(frames, ignore_index = True)
     big = big.dropna(subset = ['entries', 'exits'])
     big = makeCols(big)
-    print filter_times(big)
-    n_biggest_total(big, 'date', 100)
+    big = filter_times(big, 15, 20)
+    busy_stations = n_busiest_stations(big, 10)
+    n_biggest_days_by_station(big, 100)
     
 
 if __name__ == '__main__':
