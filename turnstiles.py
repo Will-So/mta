@@ -32,6 +32,13 @@ def clean_frame(df):
     df2 = df2[df2.entries >= 0]
     return df2
 
+def filter_times(df, start = 12, end = 23):
+    """
+    Returns all entries between start and end time, inclusive.
+    """
+    filtered = df[df['datetime'].apply(lambda x: x.hour >= start and x.hour <= end)]
+    return filtered
+
 def main():
     pd.set_option('display.max_rows', 100)
     pd.set_option('display.width', 200)
@@ -46,7 +53,8 @@ def main():
     big = pd.concat(list_of_frames, ignore_index = True)
     big = big.dropna(subset = ['entries', 'exits'])
     big = makeCols(big)
-    print big
+    #print big
+    print filtered(big)
 
 if __name__ == '__main__':
     main()
