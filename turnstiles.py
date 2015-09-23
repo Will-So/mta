@@ -4,6 +4,9 @@ from datetime import datetime, timedelta, date
 
 def get_file_names(start, end):
     list_of_files = []
+    start_dow = start.weekday()
+    print start_dow
+    start += (timedelta((5 - start_dow) % 7))
     while start < end:
         list_of_files.append('turnstile_' + start.strftime('%y%m%d') + '.txt')
         start += timedelta(7)
@@ -50,7 +53,7 @@ def main():
     pd.set_option('display.max_rows', 100)
     pd.set_option('display.width', 200)
         
-    start = date(2015, 1, 3)
+    start = date(2015, 1, 4)
     end = date(2015, 2, 1)
     files = get_file_names(start, end)
     frames = [read_file(file) for file in files]
