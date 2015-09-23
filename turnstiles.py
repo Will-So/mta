@@ -20,6 +20,17 @@ def makeCols(df):
     return df
 
 def clean_frame(df):
+    """Sets the dataframe to the correct type and removes certain erroneous entries
+
+    params
+    ----
+    df: dataframe populated with the mta subway data. 
+    """
+
+    # Removes extra headers that may have been generated while generating yearly csv
+    if 'ENTRIES' in traffic.entries.values:
+        df = remove_extra_headers(df)
+    
     df2 = pd.DataFrame()
     df2['stile'] = zip(df.ca, df.unit, df.scp, df.station)
     df2['datetime'] = pd.to_datetime(df.date+df.time, format = '%m/%d/%Y%H:%M:%S')
@@ -31,6 +42,13 @@ def clean_frame(df):
     df2 = df2[df2.entries < 5000]
     df2 = df2[df2.entries >= 0]
     return df2
+
+def remove_extra_headers(df):
+    traffic = traffic.loc[traffic.entries != 'ENTRIES']
+    traffic.entries = traffic.entries.astype(int)
+    traffic.exits = traffic.exits.astype(int)
+
+    return df
 
 def main():
     pd.set_option('display.max_rows', 100)
