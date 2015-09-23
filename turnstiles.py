@@ -19,7 +19,7 @@ def makeCols(df):
     df = clean_frame(df)
     return df
 
-def clean_frame(df):
+def clean_frame(df, all_csv=False):
     """Sets the dataframe to the correct type and removes certain erroneous entries
 
     params
@@ -28,7 +28,7 @@ def clean_frame(df):
     """
 
     # Removes extra headers that may have been generated while generating yearly csv
-    if 'ENTRIES' in traffic.entries.values:
+    if all_csv:
         df = remove_extra_headers(df)
     
     df2 = pd.DataFrame()
@@ -43,21 +43,12 @@ def clean_frame(df):
     df2 = df2[df2.entries >= 0]
     return df2
 
-<<<<<<< HEAD
 def remove_extra_headers(df):
     traffic = traffic.loc[traffic.entries != 'ENTRIES']
     traffic.entries = traffic.entries.astype(int)
     traffic.exits = traffic.exits.astype(int)
 
     return df
-=======
-def filter_times(df, start = 12, end = 23):
-    """
-    Returns all entries between start and end time, inclusive.
-    """
-    filtered = df[df['datetime'].apply(lambda x: x.hour >= start and x.hour <= end)]
-    return filtered
->>>>>>> 20fcce9487122fbd95803a1069b52858d1a303ba
 
 def main():
     pd.set_option('display.max_rows', 100)
@@ -73,7 +64,7 @@ def main():
     big = pd.concat(list_of_frames, ignore_index = True)
     big = big.dropna(subset = ['entries', 'exits'])
     big = makeCols(big)
-    print filter_times(big)
+    print big
 
 if __name__ == '__main__':
     main()
