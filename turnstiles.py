@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from collections import defaultdict
 from datetime import datetime, timedelta, date
@@ -31,15 +32,17 @@ def makeCols(df):
 
 def clean_frame(df):
     df2 = pd.DataFrame()
-    df2['stile'] = zip(df.ca, df.unit, df.scp, df.station)
+#    df2['stile'] = zip(df.ca, df.unit, df.scp, df.station)
+    df2['station'] = zip(df.station, df.linename)
     df2['datetime'] = pd.to_datetime(df.date+df.time, format = '%m/%d/%Y%H:%M:%S')
-    df2['linename'] = df.linename
     df2['date'] = df.date
     df2['time'] = df.time
     df2['entries'] = df.deltaEntries
     df2['exits'] = df.deltaExits
     df2 = df2[df2.entries < 5000]
     df2 = df2[df2.entries >= 0]
+    df2 = df2[df2.exits < 5000]
+    df2 = df2[df2.exits >= 0]
     return df2
 
 def filter_times(df, start = 12, end = 23):
@@ -49,11 +52,15 @@ def filter_times(df, start = 12, end = 23):
     filtered = df[df['datetime'].apply(lambda x: x.hour >= start and x.hour <= end)]
     return filtered
 
+def n_biggest_total(df, period, n):
+    s= df.groupby(['station', period])['exits'].agg(np.sum)
+    print s.nlargest(n)
+
 def main():
     pd.set_option('display.max_rows', 100)
     pd.set_option('display.width', 200)
         
-    start = date(2015, 1, 4)
+    start = date(2015, 1, 1)
     end = date(2015, 2, 1)
     files = get_file_names(start, end)
     frames = [read_file(file) for file in files]
@@ -61,6 +68,8 @@ def main():
     big = big.dropna(subset = ['entries', 'exits'])
     big = makeCols(big)
     print filter_times(big)
+    n_biggest_total(big, 'date', 100)
+    
 
 if __name__ == '__main__':
     main()
