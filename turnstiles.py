@@ -2,6 +2,13 @@ import pandas as pd
 from collections import defaultdict
 from datetime import datetime, timedelta, date
 
+def get_file_names(start, end):
+    list_of_files = []
+    while start < end:
+        list_of_files.append('turnstile_' + start.strftime('%y%m%d') + '.txt')
+        start += timedelta(7)
+    return list_of_files
+
 def read_file(filename):
     cols = ['ca', 'unit', 'scp', 'station', 
             'linename', 'division', 'date', 'time', 
@@ -42,15 +49,12 @@ def filter_times(df, start = 12, end = 23):
 def main():
     pd.set_option('display.max_rows', 100)
     pd.set_option('display.width', 200)
-    list_of_files = []
-    list_of_frames = []
-    
-    currDate = date(2015, 1, 3)
-    while currDate < date(2015, 2, 1):
-        list_of_files.append('turnstile_' + currDate.strftime('%y%m%d') + '.txt')
-        currDate += timedelta(7)
-    list_of_frames = [read_file(filename) for filename in list_of_files]
-    big = pd.concat(list_of_frames, ignore_index = True)
+        
+    start = date(2015, 1, 3)
+    end = date(2015, 2, 1)
+    files = get_file_names(start, end)
+    frames = [read_file(file) for file in files]
+    big = pd.concat(frames, ignore_index = True)
     big = big.dropna(subset = ['entries', 'exits'])
     big = makeCols(big)
     print filter_times(big)
